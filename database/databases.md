@@ -1,13 +1,9 @@
 Introduction
 ============
 
-Welcome to the Software Carpentry screencast on Databases. This screencast is an introduction to databases. In this screencast we'll try to give you a sense of what databases are and what you can do with them.
+Welcome to the Software Carpentry screencast on Databases. This screencast is an introduction to databases. In this screencast we'll try to give you a sense of what databases are and what you can do with them. A database is a way to store and manipulate information that is arranged as tables. Each table has columns (also known as fields) which describe the data, and rows (also known as records) which contain the data.
 
-A database is a way to store and manipulate information that is arranged as tables. Each table has columns (also known as fields) which describe the data, and rows (also known as records) which contain the data.
-
-This table you see here is a log of all of the work done on experiments in a research lab, broken down by project and scientist. Each record in the table describes an Experiment. There is a field for loginID of the scientist running the experiment, the project, experiment name, hours spent on the experiment, and date the experiment was run.
-
-In a spreadsheet, you insert formulas or new sheets to analyse your data. In a database, you give commands, also known as Queries, the database does the analysis your query specifies, and returns the results in a tabular form.
+This table you see here is a log of all of the work done on experiments in a research lab, broken down by project and scientist. Each record in the table describes an Experiment. There is a field for loginID of the scientist running the experiment, the project, experiment name, hours spent on the experiment, and date the experiment was run. In a spreadsheet, you insert formulas or new sheets to analyse your data. In a database, you give commands, also known as Queries, the database does the analysis your query specifies, and returns the results in a tabular form.
 
 Queries you give are written in a simple, english-like, language called SQL, which stands for "Structured Query Language". SQL is a vast language that provides all sorts of ways of mixing and remixing your data. In this lecture we'll assume you already have a database, and so we'll only be discussing queries that extract and analyze data.
 
@@ -19,15 +15,13 @@ The `APPEND` operation adds new, calculated fields to the results, like rounding
 
 The `AGGREGATE` operation summarizes groups of records into new records. This is useful for calculating the `SUM`, `MAX`, `MIN`, `Average` or a `count` of records that share a unique set of fields. Here we see the Hours being totaled for each project.
 
-Suppose we had a Person table that shows more details on each of the scientists. The `JOIN` operation joins two (or more) tables together by combining records based on `TRUE` or `FALSE` conditions.
+Suppose we had a Person table that shows more details on each of the scientists. The `JOIN` operation joins two (or more) tables together by combining records based on `TRUE` or `FALSE` conditions. We could use this operation to return results from the `Experiment` table with the full names of the corresponding scientists from the Person table:
 
-We could use this operation to return results from the `Experiment` table with the full names of the corresponding scientists from the Person table:
-
-A database is the right tool for managing complex and structured data, that is spread over many different tables. Databases are also designed to work quickly on very large data sets—much larger than can comfortably be managed with a spreadsheet. Queries allow for great flexibility in how you are able to analyse your data. This makes databases a good choice for if you need to explore or mix and remixing it in many different ways. Unlike spreadsheets, databases do not typically have built in charting and visualising tools. But, it's always possible to export the results of a query to be used in other tools.
+A database is the right tool for managing complex and structured data, that is spread over many different tables. Databases are also designed to work quickly on very large data sets—much larger than can comfortably be managed with a spreadsheet. Queries allow for great flexibility in how you are able to analyse your data. This makes databases a good choice for if you need to explore or mix and remixing it in many different ways. Unlike spreadsheets, databases do not typically have built in charting and visualizing tools. But, it's always possible to export the results of a query to be used in other tools.
 
 So, summing up: A database is a set of tables of data on which you can explore and manipulate using queries. We've seen six basic kinds of operations that you can do on the data in a database: `SELECT`, `APPEND`, `FILTER`, `AGGREGATE`, `JOIN`, `SORT`.
 
-In this screencast we've tried to give you a flavour of the sorts of remixing you can do by showing you the basic operations. Databases are the right tool for managing large amounts of data, or data that is complex. They are useful when you need to remix and explore your data in different ways.
+In this screencast we've tried to give you a flavor of the sorts of remixing you can do by showing you the basic operations. Databases are the right tool for managing large amounts of data, or data that is complex. They are useful when you need to remix and explore your data in different ways.
 
 Selecting Data
 ==============
@@ -369,7 +363,7 @@ WHERE Person.LoginID = Experiment.LoginID;
 
 but using the `ON` clause makes it clear what relationship you intend there to be in the join. Notice in our query that we put the `Person` table name before the `LoginID` in the `ON` clause. This is necessary because the `LoginID` field appears in both the `Person` and the `Experiment` table, so we need to be clear which table's field we are referring to. We can use this same 'dot' syntax to refer to columns we want to return. For example, if we wrote this:
 
-``
+```
 SELECT Person.FirstName, Experiment.*
 FROM Person
 JOIN Experiment
@@ -447,125 +441,170 @@ WHERE Hours = NULL ;
 
 We get no results, why? For many database systems, NULL is a special value that isn't comparable to anything else using the usual equality operators (e.g. =, !=, , …). Comparing NULL to any other value using these operators always return False. So, In our query the condition Hours = NULL is always false, so no records returned. To write a condition that returns true on rows that contain NULL values you must use the IS operator:
 
+```
 SELECT * FROM Experiment
 WHERE Hours IS NULL;
+```
 
 IS is used to compare fields to NULL. It behaves like the = operator, except that it returns True when comparing two NULL values. Here you can see that the entries in the experiments table with missing Hours fields are returned. To find all of the rows that do not have a NULL Value, you can use the IS NOT operator for nulls in place of the != operator
 
+```
 SELECT * FROM Experiment
 WHERE Hours IS NOT NULL;
+```
 
 Because NULL is a different type of value all together, if your data may have NULL values in it, your queries must take this into account. For example, suppose you wanted to find the all of the Experiments which did not take 7 hours. You might write:
 
+```
 SELECT * FROM Experiment
 WHERE Hours != 7;
+```
 
 Notice that the results are missing the records with NULL values in the Hours field. Those records were filtered out because, as we've said, only the IS and IS NOT operator will return True when comparing a NULL to another value. If we mean for these rows to be included, we need to add to the WHERE clause to explicitly check for NULL values:
 
+```
 SELECT * FROM Experiment
 WHERE Hours != 7 OR Hours IS NULL;
+```
 
 Now when we run our query we get back those records with NULL Hours values along with the other records where the Hours field doesn't equal 7. NULL values are also handled differently by aggregation functions. Most aggregation functions ignore NULL values in their calculations. So, for instance, let's look at the SUM function. To calculate the total number of hours spent on experiments we'd start with a query like this,
 
+```
 SELECT Hours FROM Experiment;
 add SUM to total the values…
+```
 
 SELECT Sum(Hours) FROM Experiment;
 
 … but this total is actually just the sum of all of the numeric values. The NULL values are skipped. This more important for functions like AVG, which depend on the total number of records in the aggregation.
 
+```
 SELECT AVG(Hours) FROM Experiment;
+```
 
-NULL values are skipped, and so they don't count towards the average. The NULL values are not treated as zero, the average function just skips over them as if they weren't in the dataset.
-This is also true for Max, Min, and `COUNT` in SQLite. In this lecture we've seen that databases use a special value for empty or missing information, NULL. This value has to be taken into account, and handled in a unique way, when you are writing queries. We will see ways of working with NULL values pop up in many future lectures.
+`NULL` values are skipped, and so they don't count towards the average. The NULL values are not treated as zero, the average function just skips over them as if they weren't in the dataset. This is also true for Max, Min, and `COUNT` in SQLite. In this lecture we've seen that databases use a special value for empty or missing information, NULL. This value has to be taken into account, and handled in a unique way, when you are writing queries. We will see ways of working with NULL values pop up in many future lectures.
 
 Nested Queries
 ==============
 
 Welcome to the Software Carpentry screencast on Databases. This screencast is on nesting queries. How do we find scientists that haven't been experimenting with time travel? Our first instinct might be to write a query like this:
 
+```
 SELECT DISTINCT LoginID,
 FROM Experiment
 WHERE Project != 'Time Travel';
+```
 
 Unfortunately, this query doesn't give us what we want, since 'ivan' and 'skol' (Sofia) have each worked both on Time Travel but also on other projects as well.There are scientists who have worked on Time Travel Projects….. and their are scientists who have worked on other projects…… and, of course, there are scientists who have worked on both Time Travel projects AND other projects as well. Our query is returning all of the scientists who have worked on projects other than Time Travel… but that includes scientists that have worked on time travel and other projects. Our original question was to find all of the scientists that had never worked on Time Travel. To see why, let's look at the experiment table, but we'll sort the records by scientist and project:
 
+```
 SELECT * FROM Experiment ORDER BY LoginID, Project;
+```
 
 Our original query reject rows where the project was 'Time Travel'. But for scientists like Ivan, who have worked on other projects, their other projects don't get filtered out, and so their names appear in the final results. The strategy for answering this question is to start with all of the scientists. subtract those scientists which have worked on Time Travel projects  to get just the scientists that haven't been experimenting with Time Travel. To do this we'll make use of nested queries. Finding all of the scientists who have worked on Time Travel projects is easy:
 
+```
 SELECT DISTINCT LoginID FROM Experiment
 WHERE Project = 'Time Travel';
+```
 
 Finding all of the scientists is also easy:
 
+```
 SELECT DISTINCT LoginID FROM Experiment;
+```
 
 What we want to do is somehow:
 
+```
 SELECT DISTINCT LoginID FROM Experiment
 WHERE
+```
 
 subtract, or filter, from these results the results of our earlier query:
 
+```
 WHERE LoginID NOT IN ('ivan', 'skol');
+```
 
 In SQL we're able to nest one query inside of another to use its results in filter conditions. So, we create a filter condition that only includes scientists
 
+```
 SELECT DISTINCT LoginID FROM Experiment
 WHERE LoginID NOT IN
   (SELECT DISTINCT LoginID FROM Experiment
   WHERE Project = 'Time Travel');
+```
 
 where their LoginID is not in… and then we put the results of the first query in parentheses. So, we can read this query as saying, "Fetch all of the scientists who have run experiments, but exclude them if they appear in the list of scientists who have worked on Time Travel". And this is what we wanted! The pattern demonstrated by this query, of selecting and then filtering based on the results of nested query, is very useful one. I should note, that the nested query here is completely separate from the larger query. It just fetches a list of LoginIDs once, and those loginIDs are used by the larger query's filter condition as it inspects each record. But nested queries can also refer to the larger query they are embedded in. For instance, in our screencast on JOIN we asked the question: which scientists have worked on more than one project? We answered the question by joining the Experiment table to itself and then filtering results so that we only had scientists that had been paired with themselves, but working on different projects. Using nested queries we can answer this same question in a different way. Let's first remind ourselves of who has worked on which projects:
 
+```
 SELECT LoginID, Project FROM Experiment ORDER BY LoginID, Project;
+```
 
 Best has worked on one project, so has Dian Fossey, dimitri, Banting, Herschel. But, Ivan Pavlov has worked on two projects, and so has Lomonosov, and so has Kovaleskaya. So, we can write a query that selects the scientists from the experiments table.
 
+```
 SELECT DISTINCT LoginID FROM Experiment e1
 WHERE
+```
+
 where… 
 
 and here we want to filter out the scientist if they haven't worked on any other project. That is, in order to be included they must /have/ worked on another project:
 
+```
 WHERE LoginID IN (
+```
 
 Well, we need a query that will fetch the OTHER projects the scientist has been involved in. So, we start with fetching the LoginIDs
 
-SELECT DISTINCT LoginID FROM Experiment e2
-...
+```
+SELECT DISTINCT LoginID FROM Experiment e2 ...
+```
 
 but put a filter condition in so that the loginIDs we fetch are those of the same scientist, but have a different project.
 
+```
 ...
 WHERE e2.LoginID = e1.LoginID AND e1.Project != e2.Project);
+```
 
 When we run this query we get Pavlov, Lomonosov, Kovaleskaya as expected. This is a different kind of nested query than we wrote before, because the results of this nested query depend on which record is being processed by the outer query.
 
+```
 SELECT DISTINCT LoginID FROM Experiment e1
 WHERE LoginID IN (
   SELECT DISTINCT LoginID FROM Experiment e2
   WHERE e2.LoginID = e1.LoginID AND e1.Project != e2.Project);
+```
 
 Nested queries can also be use in place of tables. That is, a nested query can provide the datasource from which you select, filter, aggregate, etc. For example, what if we wanted to know how many different projects each scientist had worked on. We can begin by finding the distinct list of projects each scientist worked on, which can do like so:
 
+```
 SELECT DISTINCT LoginID, Project FROM Experiment;
+```
 
 We want to count how many projects are listed here for each scientist. Since counting is an aggregation, we need to use the results of this query as input for a separate query that does the aggregation. We can nest this query as the source for a larger query by wrapping it in parentheses, and putting it in the FROM clause:
 
+```
 ...
 FROM (SELECT DISTINCT LoginID, Project FROM Experiment);
+```
 
 We want the scientist, and count of their projects:
 
+```
 SELECT LoginID, COUNT(*)
 FROM (SELECT DISTINCT LoginID, Project FROM Experiment)
-
 ...
+```
+
 and we want to count over each scientist:
 
+```
 ...
 GROUP BY LoginID
+```
 
-Nesting queries like this is really useful if the data you want to write a query on isn't present in exactly the right form in the database. You can use one query to get the data in the form you need it in, and then with nesting you're able to use those results as the input for a larger query. In this screencast we've introduced the idea of nesting queries. We've seen that you can nest a query to supply elemenths in a WHERE condition, and we've also seen we can use a nested query in place of a table in the FROM clause.
+Nesting queries like this is really useful if the data you want to write a query on isn't present in exactly the right form in the database. You can use one query to get the data in the form you need it in, and then with nesting you're able to use those results as the input for a larger query. In this screencast we've introduced the idea of nesting queries. We've seen that you can nest a query to supply elemenths in a WHERE condition, and we've halso seen we can use a nested query in place of a table in the FROM clause.
